@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
     mode: 'development',
@@ -10,7 +11,9 @@ module.exports = {
     // 웹팩 작업을 통해 생성된 결과물
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'main.js'
+        filename: '[name][contenthash].js',
+        clean: true,
+        assetModuleFilename: '[name][ext]'
     },
     module: {
         rules: [
@@ -24,6 +27,20 @@ module.exports = {
                     // Compiles Sass to CSS
                     "sass-loader",
                 ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/,
+                type: 'asset/resource'
             }
         ]
     },
@@ -31,6 +48,15 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: 'src/index.html',  
-        })
-    ]
+        }),
+        new BundleAnalyzerPlugin()
+    ],
+    devServer: {
+        static: {
+            directory: path.join(__dirname, 'dist'),
+        },
+        compress: true,
+        port: 3000,
+        open: true
+    }
 }
